@@ -83,7 +83,7 @@ def health():
 async def produce(
     payload: IncomingPayload,
     request: Request,
-    x_api_token: Optional[str] = Header(default=None, convert_underscores=False),
+    x_api_token: str = Header(default=None, alias="X-API-Token"),
 ):
     expected = get_expected_token()
     if not x_api_token or x_api_token != expected:

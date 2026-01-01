@@ -13,3 +13,18 @@ variable "token_value" {
   sensitive   = true
   description = "Shared API token"
 }
+
+variable "producer_image" {
+  type        = string
+  description = "Full ECR image URI for producer (including tag)"
+}
+
+variable "consumer_image" {
+  type        = string
+  description = "Full ECR image URI for consumer (including tag)"
+}
+
+variable "allowed_ingress_cidr" {
+  type        = string
+  description = "CIDR allowed to access the ALB (use your laptop public IP/32)"
+}

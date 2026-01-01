@@ -14,14 +14,14 @@ variable "token_value" {
   description = "Shared API token"
 }
 
-variable "producer_image" {
+variable "producer_image_tag" {
   type        = string
-  description = "Full ECR image URI for producer (including tag)"
+  description = "producer image tag (version)"
 }
 
-variable "consumer_image" {
+variable "consumer_image_tag" {
   type        = string
-  description = "Full ECR image URI for consumer (including tag)"
+  description = "consumer image tag (version)"
 }
 
 variable "allowed_ingress_cidr" {

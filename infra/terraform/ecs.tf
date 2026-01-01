@@ -25,7 +25,7 @@ resource "aws_ecs_task_definition" "producer" {
   container_definitions = jsonencode([
     {
       name      = "producer"
-      image     = var.producer_image
+      image     = "${module.ecr_producer.repository_url}:${var.producer_image_tag}"
       essential = true
       portMappings = [
         { containerPort = 8080, hostPort = 8080, protocol = "tcp" }
@@ -60,7 +60,7 @@ resource "aws_ecs_task_definition" "consumer" {
   container_definitions = jsonencode([
     {
       name      = "consumer"
-      image     = var.consumer_image
+      image     = "${module.ecr_consumer.repository_url}:${var.consumer_image_tag}"
       essential = true
       environment = [
         { name = "AWS_REGION",     value = var.aws_region },

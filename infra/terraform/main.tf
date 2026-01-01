@@ -29,3 +29,14 @@ module "ssm" {
   parameter_value  = var.token_value
 }
 
+module "ecr_producer" {
+  source = "./modules/ecr"
+  name   = "producer-service"
+}
+
+module "ecr_consumer" {
+  source = "./modules/ecr"
+  name   = "consumer-service"
+}
+
+

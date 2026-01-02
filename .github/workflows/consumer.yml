@@ -1,4 +1,4 @@
-name: Build and Push to ECR
+name: Build and Push consumer to ECR
 
 on:
   push:
@@ -6,18 +6,18 @@ on:
     paths:
       - app/consumer-service/**
 env:
-  AWS_REGION: ${{ secrets.AWS_REGION }}
-  AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-  ECR_PRODUCER_REPO: producer-service
-  ECR_CONSUMER_REPO: consumer-service
+  REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+  ECR_CONSUMER_REPO: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/consumer-service
   TAG_NAME: ${{ github.run_number }}
+  CONSUMER_URI: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/consumer-service:${{ env.TAG_NAME }}
+  CONSUMER_URI_LATEST: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/consumer-service:latest
+  TF_DIR: infra/terraform
 
 jobs:
   build_and_push_images:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -26,18 +26,41 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: login to ECR
-        uses: docker/login-action@v3
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push consumer image
+        uses: docker/build-push-action@v6
         with:
-          registry: ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
+          context: ./app/consumer-service
+          push: true
+          tags: |
+            ${{ env.CONSUMER_IMAGE }}:${{ env.IMAGE_TAG }}
+            ${{ env.CONSUMER_IMAGE }}:latest
 
-      - name: Build consumer image
-        run: docker build -f app/consumer-service/Dockerfile -t consumer:${{ env.TAG_NAME }} app/consumer-service
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.0
 
-      - name: Tag & push consumer image to ECR
+      - name: Terraform init
+        working-directory: ${{ env.TF_DIR }}
+        run: terraform init
+
+      - name: Terraform validate
+        working-directory: ${{ env.TF_DIR }}
+        run: terraform validate
+
+      - name: Terraform apply
+        working-directory: ${{ env.TF_DIR }}
+        run: terraform apply -auto-approve -var="token_value=CHANGE_ME" -var="allowed_ingress_cidr=0.0.0.0/0" -var="producer_image_tag=latest" -var="consumer_image_tag=${{ env.TAG_NAME }}"
+
+      - name: Test
+        run: echo "Here we will run tests, if it passed we will mark it as latest else we will revert to latest"
+
+      - name: Tests passed
         run: |
-          CONSUMER_URI="${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_CONSUMER_REPO }}:${{ env.TAG_NAME }}"
-          docker tag consumer:${{ env.TAG_NAME }} "$CONSUMER_URI"
-          docker push "$CONSUMER_URI"
+          docker tag consumer:${{ env.TAG_NAME }} ${{ env.CONSUMER_URI_LATEST }}
+          docker push ${{ env.CONSUMER_URI_LATEST }}

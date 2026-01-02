@@ -9,6 +9,7 @@ from botocore.exceptions import ClientError
 from dateutil import parser as date_parser
 
 
+
 AWS_REGION = os.getenv("AWS_REGION", "eu-central-1")
 SQS_QUEUE_URL = os.getenv("SQS_QUEUE_URL", "")
 S3_BUCKET = os.getenv("S3_BUCKET", "")

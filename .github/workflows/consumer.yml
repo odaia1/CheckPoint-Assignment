@@ -8,7 +8,7 @@ on:
 env:
   REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
   ECR_CONSUMER_REPO: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/consumer-service
-  TAG_NAME: ${{ github.run_number }}
+  IMAGE_TAG: ${{ github.run_number }}
   CONSUMER_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/consumer-service
   TF_DIR: infra/terraform
 
@@ -54,4 +54,4 @@ jobs:
 
       - name: Terraform apply
         working-directory: ${{ env.TF_DIR }}
-        run: terraform apply -auto-approve -var="token_value=CHANGE_ME" -var="allowed_ingress_cidr=0.0.0.0/0" -var="producer_image_tag=latest" -var="consumer_image_tag=${{ env.TAG_NAME }}"
+        run: terraform apply -auto-approve -var="token_value=CHANGE_ME" -var="allowed_ingress_cidr=0.0.0.0/0" -var="producer_image_tag=latest" -var="consumer_image_tag=${{ env.IMAGE_TAG }}"

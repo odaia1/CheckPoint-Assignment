@@ -6,8 +6,6 @@ on:
     paths:
       - app/producer-service/**
 env:
-  REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
-  ECR_PRODUCER_REPO: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/producer-service
   PRODUCER_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/producer-service
   IMAGE_TAG: ${{ github.run_number }}
   TF_DIR: infra/terraform

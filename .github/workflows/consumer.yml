@@ -9,8 +9,7 @@ env:
   REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
   ECR_CONSUMER_REPO: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/consumer-service
   TAG_NAME: ${{ github.run_number }}
-  CONSUMER_URI: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/consumer-service:${{ env.TAG_NAME }}
-  CONSUMER_URI_LATEST: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/consumer-service:latest
+  CONSUMER_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/consumer-service
   TF_DIR: infra/terraform
 
 jobs:
@@ -56,11 +55,3 @@ jobs:
       - name: Terraform apply
         working-directory: ${{ env.TF_DIR }}
         run: terraform apply -auto-approve -var="token_value=CHANGE_ME" -var="allowed_ingress_cidr=0.0.0.0/0" -var="producer_image_tag=latest" -var="consumer_image_tag=${{ env.TAG_NAME }}"
-
-      - name: Test
-        run: echo "Here we will run tests, if it passed we will mark it as latest else we will revert to latest"
-
-      - name: Tests passed
-        run: |
-          docker tag consumer:${{ env.TAG_NAME }} ${{ env.CONSUMER_URI_LATEST }}
-          docker push ${{ env.CONSUMER_URI_LATEST }}

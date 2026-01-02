@@ -8,9 +8,8 @@ on:
 env:
   REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
   ECR_PRODUCER_REPO: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/producer-service
+  PRODUCER_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/producer-service
   TAG_NAME: ${{ github.run_number }}
-  PRODUCER_URI: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/producer-service:${{ env.TAG_NAME }}
-  PRODUCER_URI_LATEST: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/producer-service:latest
   TF_DIR: infra/terraform
 
 jobs:
@@ -56,11 +55,3 @@ jobs:
       - name: Terraform apply
         working-directory: ${{ env.TF_DIR }}
         run: terraform apply -auto-approve -var="token_value=CHANGE_ME" -var="allowed_ingress_cidr=0.0.0.0/0" -var="producer_image_tag=${{ env.TAG_NAME }}" -var="consumer_image_tag=latest"
-
-      - name: Test
-        run: echo "Here we will run tests, if it passed we will mark it as latest else we will revert to latest"
-
-      - name: Tests passed
-        run: |
-          docker tag producer:${{ env.TAG_NAME }} ${{ env.PRODUCER_URI_LATEST }}
-          docker push ${{ env.PRODUCER_URI_LATEST }}
